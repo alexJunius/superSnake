@@ -1,0 +1,10 @@
+#:include levelObjects/level.kv
+#:include levelObjects/snake.kv
+
+FloatLayout:
+    Background:
+        canvas.before:
+            Rectangle:
+                size: self.size
+                pos: self.pos
+                source: "img/floor.png"
