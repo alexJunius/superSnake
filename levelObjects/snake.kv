@@ -1,6 +1,7 @@
 <SnakePart>:
-    canvas.before:
+    size_hint: None, None
+    canvas:
         Rectangle:
-            pos: root.width / self.nCols * self.x_grid, root.height / self.nLines * self.y_grid
-            size: root.width / self.nCols, root.height / self.nLines
+            pos: self.pos
+            size: self.size
             source: self.imagePath

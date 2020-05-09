@@ -13,8 +13,11 @@ from kivy.uix.widget import Widget
 from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.core.window import Window
+from kivy.clock import Clock
 
-from levelObjects import snake, level
+from levelObjects.level import Level
+from levelObjects.snake import Snake, SnakePart
+from functools import partial
 
 
 class Background(Widget):
@@ -32,11 +35,14 @@ class Background(Widget):
 class MainApp(App):
     def on_start(self):
         # Init level object and draw everything
-        self.level = level.Level('levels/level1.txt')  # Create matrix on init
+        self.level = Level('levels/level1.txt')  # Create matrix on init
         self.walls = self.level.create_walls()
-        self.apples = [] #self.level.draw_apples()
+        self.apples = self.level.create_apples()
         self.snake = self.level.create_snake()  # draw and return snake object
         self.draw_everything()
+
+        self._keyboard = Window.request_keyboard(self._keyboard_closed, self.root)
+        self._keyboard.bind(on_key_down=self._on_keyboard_down)
 
     def draw_everything(self):
         for elt in self.walls:
@@ -47,7 +53,22 @@ class MainApp(App):
         self.root.add_widget(self.snake.head)
         for elt in self.snake.body:
             self.root.add_widget(elt)
-        print('done')
+
+    def _keyboard_closed(self):
+        self._keyboard.unbind(on_key_down=self._on_keyboard_down)
+        self._keyboard = None
+
+    def _on_keyboard_down(self, keyboard, keycode, text, modifiers):
+        if not self.snake.moving:
+            self.snake.moving = True
+            self.key = keycode[1]
+            self.clock = Clock.schedule_interval(partial(self.move_snake, keycode[1]), 1/60.)
+
+    def move_snake(self, direction, dt):
+        if self.snake.moving:
+            self.snake.move(direction, self.level, self)
+        else:
+            self.clock.cancel()
 
 
 if __name__ == '__main__':
